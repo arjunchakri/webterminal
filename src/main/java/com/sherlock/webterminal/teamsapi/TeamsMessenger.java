@@ -85,7 +85,7 @@ public class TeamsMessenger {
 
   public static void main(String[] args) {
     triggerMessage(
-        "https://outlook.office.com/webhook/f17cb6b4-c5b6-4c96-975e-77a88b1e4ed7@ff9b87e3-c548-4b3d-8782-7cf47b86c057/IncomingWebhook/ea4c544db7ca4214b8754c9d4e24690a/afcb31b7-84c2-40c9-a799-0c39055e169e",
+        "<TEAMS WEBHOOKURL HERE>",
         "testing from java code");
   }
 
