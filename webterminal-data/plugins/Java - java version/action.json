@@ -1,0 +1,5 @@
+{
+  "command": "java -version",
+  "workspace": "",
+  "showconfirmation": "false"
+}

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Log Viewer</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <!-- moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-modelist.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/theme-monokai.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-javascript.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-java.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-html.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js'></script>
+	
+	
+	</head>
+
+<body>
+    <input type="hidden" th:value="${readerKey}" id="readerKey" />
+    <input type="hidden" th:value="${path}" id="path" />
+    
+    <input type="hidden" id="logfile" />
+    <input type="hidden" id="logdirectory" />
+
+    <div class="container">
+        <div class="Terminal">
+            <div class="Terminal__Toolbar">
+                <div class="Toolbar__buttons">
+                    <button onClick="window.location.reload();" title="Close session" class="Toolbar__button Toolbar__button--exit">&#10005;</button>
+                    <button onClick="selectText('Terminal__body')" title="Select console text" class="Toolbar__button">&#9472;</button>
+                    <button onClick="toggleFullscreen();" title="Full screen" class="Toolbar__button">&#9723;</button>
+                    <button onClick="saveFileToServer();" title="Get more logs" class="Toolbar__button">&#8635;</button>
+                    
+                </div>
+                <p class="Toolbar__user">
+                	<span class=green>Connected</span> to server:~ <span id="headerfilename" class="blue"></span>
+            		<span class=green id="numberoflines"></span> 
+            	</p>
+            </div>
+                <div class="Terminal__body" >
+
+<div id="editor">
+var x = 100;
+var text = "hello, world";
+
+console.log(x);
+alert(text);
+</div>
+        </div>
+        
+    </div>
+    
+    <style>
+    	#editor {
+    	  	overflow-y: scroll;
+  			height: calc(100% - 35px);
+  		}
+    </style>
+    
+    <script>
+        console.log($("#readerKey").val())
+
+        //moment().format('MMMM Do YYYY, h:mm:ss a');
+
+        var socketProtocol = "wss";
+        if (!location.protocol.startsWith("https")) {
+            socketProtocol = "ws";
+        }
+        
+        
+        $(document).ready(function() {
+        });
+        init();
+
+        function init() {
+        	
+        	var path = $("#path").val()
+        	
+        	var socket_url = socketProtocol + '://' + window.location.host + '/folder_listener_socket';
+
+        	var socket = new WebSocket(socket_url);
+     		var payload_data = {
+     			folderpath: path
+          	}
+            $("#editor").empty();
+
+            var payload_data_stringified = JSON.stringify(payload_data)
+            console.log("payload_data_stringified=" + payload_data_stringified)
+
+            socket.onopen = function() {
+                socket.send(payload_data_stringified);
+             };
+             socket.onmessage = function(message) {
+                 console.log('Message received from server: ' + message.data);
+                 var incomingdata = unEntity(message.data);
+                 
+                 if(incomingdata == "ENDOFFILEWEBTERMINAL") {
+                	var editor = ace.edit("editor");
+                	editor.setTheme("ace/theme/monokai");
+                	var modelist = ace.require("ace/ext/modelist")
+                	ace.require("ace/ext/language_tools");
+                	var mode = modelist.getModeForPath(path).mode
+                	//alert(mode)
+                	
+                	editor.session.setMode(mode) // mode now contains "ace/mode/javascript".
+                	editor.setOptions({
+                	    enableBasicAutocompletion: true,
+                	    enableSnippets: true,
+                	    enableLiveAutocompletion: true
+                	});
+                	
+                	//editor.getSession().setMode("ace/mode/javascript");
+                 } else {
+                     $("#editor").append(incomingdata + "\n");
+                 }
+                 
+             };
+        	
+            //$("#editor").empty();
+            //$("#editor").append("TestEdit");
+        	
+        	//var editor = ace.edit("editor");
+        	//editor.setTheme("ace/theme/monokai");
+        	//editor.getSession().setMode("ace/mode/javascript");
+        	
+
+        }
+        
+        function saveFileToServer() {
+        	var path = $("#path").val()
+
+            var requesturl = "/backupAndDelete?path=" + path
+            console.log("requesturl=" + requesturl)
+
+            $.get(requesturl, function(response) {
+            	
+            	alert(response + ". Starting to save...")
+            	
+            	var editor = ace.edit("editor");
+    			
+            	var socket_url = socketProtocol + '://' + window.location.host + '/folder_listener_socket';
+
+            	var socket = new WebSocket(socket_url);
+         		
+                socket.onopen = function() {     			
+         			var alllines = editor.getValue().split("\n")
+    				for (var i = 0; i < alllines.length; i++) {
+    					var payload_data = {
+    		     			folderpath: path, 
+    		     			savecontents: alllines[i]
+    		          	}
+
+    		            var payload_data_stringified = JSON.stringify(payload_data)
+    		            console.log("payload_data_stringified=" + payload_data_stringified)
+    	     			socket.send(payload_data_stringified);
+
+    				}
+         			
+         			alert("Saved !!");
+         			
+                };
+            	
+            });
+        	
+        	
+        	
+        }
+
+        function bytesToSize(bytes) {
+            var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (bytes == 0) return '0 Byte';
+            var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+
+        function showhideFolder(divClass) {
+            $("." + divClass).slideToggle();
+        }
+
+        
+        function getMoreLines() {
+            var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+            startExecution(logfile, logdirectory, "false")
+        }
+        
+        function downloadFileZipped() {
+        	var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+            var readerKey = $("#readerKey").val()
+            
+            $("#Terminal__body").empty();
+            $("#Terminal__body").append("<div class=logline> Downloading the file: " + logfile + ". Please wait <span class=Prompt__cursor></span></div>");
+
+            var requesturl = contextPath + "/downloadLog?fileName=" + logfile + "&dirPath="+ logdirectory + "&readerKey=" + readerKey
+            console.log("requesturl=" + requesturl)
+
+            $.get(requesturl, function(response) {
+            	
+				var responseJson;
+            	
+            	if (typeof response == 'object') {
+            		responseJson = response
+            	} else {
+            		responseJson = JSON.parse(response);
+            	}
+            					
+                for (var i = 0; i < responseJson.length; i++) {
+                	var inputStringBean = responseJson[i]
+                	var transportBean = JSON.parse(inputStringBean);
+                	
+                    var action = transportBean["action"]
+                    var data = transportBean["data"]
+                    
+                    if(action == "click") {
+                    	var downloadUrl = window.location.protocol + "//" + window.location.host + contextPath + "/" + data
+                    	window.location.replace(downloadUrl,"_blank");
+                    	addSequentialMessage("Download started...")
+                    } if(action == "display") {
+                    	addSequentialMessage(data);
+                    }
+                }
+            });
+            
+        }
+        
+
+        function downloadFileZippedFromContext() {
+        	var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+            var readerKey = $("#readerKey").val()
+            
+            $("#Terminal__body").empty();
+            $("#Terminal__body").append("<div class=logline> Downloading the file: " + logfile + ". Please wait <span class=Prompt__cursor></span></div>");
+
+            var requesturl = contextPath + "/downloadLog?fileName=" + logfile + "&dirPath="+ logdirectory + "&readerKey=" + readerKey
+            console.log("requesturl=" + requesturl)
+
+            $.get(requesturl, function(response) {
+            	
+				var responseJson;
+            	
+            	if (typeof response == 'object') {
+            		responseJson = response
+            	} else {
+            		responseJson = JSON.parse(response);
+            	}
+            					
+                for (var i = 0; i < responseJson.length; i++) {
+                	var inputStringBean = responseJson[i]
+                	var transportBean = JSON.parse(inputStringBean);
+                	
+                    var action = transportBean["action"]
+                    var data = transportBean["data"]
+                    
+                    if(action == "click") {
+                    	var downloadUrl = contextPath + "/" + data
+                    	window.location.replace(downloadUrl,"_blank");
+                    	addSequentialMessage("Download started...")
+                    } if(action == "display") {
+                    	addSequentialMessage(data);
+                    }
+                }
+            });
+            
+        }
+        
+        function startExecution(fileName, dirPath, erasePanel) {
+            $("#logfile").val(fileName)
+            $("#logdirectory").val(dirPath)
+            var readerKey = $("#readerKey").val()
+            
+            var requesturl = contextPath + "/tailLog?fileName=" + fileName + "&dirPath="+ dirPath + "&readerKey=" + readerKey
+            console.log("requesturl=" + requesturl)
+
+            $.get(requesturl, function(response) {
+            	
+				var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}				
+
+                for (var i = 0; i < data.length; i++) {
+                    var eachLogline = data[i];
+                    addMessage(eachLogline);
+
+                }
+
+            });
+            
+            if (erasePanel != "false") {
+                $("#Terminal__body").empty();
+            }
+            
+            $("#headerfilename").html(fileName);
+        }
+
+        function addSequentialMessage(message) {
+            message = unEntity(message);
+
+            $("#Terminal__body").append("<div class=logline> " + message + " </div>");
+            
+        }
+
+        function addMessage(message) {
+            message = unEntity(message);
+
+            $("#Terminal__body").prepend("<div class=logline> " + message + " </div>");
+            
+            $("#numberoflines").html(" - " + $("#Terminal__body > div").length + " lines");
+            $('#Terminal__body').scrollTop($('#Terminal__body')[0].scrollHeight);
+
+        }
+
+        function unEntity(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        
+        function selectText(containerid) {
+            if (document.selection) { // IE
+                var range = document.body.createTextRange();
+                range.moveToElementText(document.getElementById(containerid));
+                range.select();
+            } else if (window.getSelection) {
+                var range = document.createRange();
+                range.selectNode(document.getElementById(containerid));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            }
+        }
+        
+        function toggleFullscreen() {
+            var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+                (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+                (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+                (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+            var docElm = document.documentElement;
+            if (!isInFullScreen) {
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen();
+                } else if (docElm.mozRequestFullScreen) {
+                    docElm.mozRequestFullScreen();
+                } else if (docElm.webkitRequestFullScreen) {
+                    docElm.webkitRequestFullScreen();
+                } else if (docElm.msRequestFullscreen) {
+                    docElm.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>

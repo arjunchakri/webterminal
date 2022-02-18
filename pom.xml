@@ -1,0 +1,121 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.sherlock</groupId>
+	<artifactId>webterminal</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.4.RELEASE</version>
+		<relativePath />
+	</parent>
+
+	<name>nothing</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
+		<dependency>
+			<groupId>net.lingala.zip4j</groupId>
+			<artifactId>zip4j</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.simplejavamail/simple-java-mail -->
+		<dependency>
+			<groupId>net.markenwerk</groupId>
+			<artifactId>utils-mail-dkim</artifactId>
+			<version>1.1.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.simplejavamail</groupId>
+			<artifactId>simple-java-mail</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.j2html</groupId>
+			<artifactId>j2html</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+
+		<!-- Main Guacamole library -->
+		<dependency>
+			<groupId>org.apache.guacamole</groupId>
+			<artifactId>guacamole-common</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook <dependency> 
+			<groupId>com.1stleg</groupId> <artifactId>jnativehook</artifactId> <version>2.0.2</version> 
+			</dependency> -->
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j <dependency> 
+			<groupId>net.sourceforge.tess4j</groupId> <artifactId>tess4j</artifactId> 
+			<version>4.5.4</version> </dependency> -->
+
+
+		<!-- https://mvnrepository.com/artifact/org.apache.guacamole/guacamole-common 
+			<dependency> <groupId>org.apache.guacamole</groupId> <artifactId>guacamole-common</artifactId> 
+			<version>0.9.13-incubating</version> </dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit 
+			<dependency> <groupId>org.eclipse.jgit</groupId> <artifactId>org.eclipse.jgit</artifactId> 
+			<version>5.4.0.201906121030-r</version> </dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/org.zeroturnaround/zt-exec/1.12 
+			<dependency> <groupId>org.zeroturnaround</groupId> <artifactId>zt-exec</artifactId> 
+			<version>1.12</version> </dependency> -->
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
+				<version>3.1.2</version> <executions> <execution> <id>copy</id> <phase>package</phase> 
+				<goals> <goal>copy</goal> </goals> <configuration> <artifactItems> <artifactItem> 
+				<groupId>org.eclipse.jgit</groupId> <artifactId>org.eclipse.jgit</artifactId> 
+				<overWrite>false</overWrite> <outputDirectory>${project.build.directory}/installerlib</outputDirectory> 
+				<destFileName>org.eclipse.jgit.jar</destFileName> </artifactItem> </artifactItems> 
+				</configuration> </execution> </executions> </plugin> -->
+		</plugins>
+	</build>
+
+</project>

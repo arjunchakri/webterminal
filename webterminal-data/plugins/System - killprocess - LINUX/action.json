@@ -1,0 +1,5 @@
+{
+  "command": "kill -9 $(PROCESSPID)",
+  "workspace": "",
+  "compatibility": "linux"
+}

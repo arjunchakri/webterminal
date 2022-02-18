@@ -1,0 +1,130 @@
+body {
+     background: #053849;
+     position:fixed;
+     top:3px;
+     bottom:3px;
+     left:3px;
+     right:3px;
+     
+     color: #f1f1f1;
+     font-family: 'Source Code Pro';
+     font-weight: 200;
+     font-size: 0.9em;
+}
+
+.headerpanel{
+	height: 30px;
+	background-color: white;
+	background-color: #b4b4b4; 
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.logline {
+	width: max-content;
+}
+
+ .logviewerpanel {
+     position: absolute;
+     top: 30px;
+     right: 0;
+     bottom: 0;
+     left: 0;
+     /*border: 15px solid orange width: 95%;*/
+     overflow-y: scroll;
+     
+     padding: 1%;
+     list-style: none;
+     border-bottom-left-radius: 10px;
+     border-bottom-right-radius: 10px;
+     
+     background: #262728;
+
+    /* Colors */
+}
+ .logviewerpanel::-webkit-scrollbar-track {
+     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+     border-radius: 10px;
+     background-color: #272121;
+}
+ .logviewerpanel::-webkit-scrollbar {
+     width: 12px;
+     background-color: #272121;
+}
+ .logviewerpanel::-webkit-scrollbar-thumb {
+     border-radius: 10px;
+     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+     background-color: #555;
+}
+ .logviewerpanel li {
+     min-height: 25px;
+     line-height: 25px;
+}
+ .logviewerpanel .tab {
+     margin-left: 2%;
+     list-style: none;
+}
+.blue {
+     color: #66d9ef;
+}
+.purple {
+     color: #8a7bff;
+}
+.red {
+     color: #e92772;
+}
+.green {
+     color: #a6e22d;
+}
+.orange {
+     color: #fd9720;
+}
+.yellow {
+     color: #e6db74;
+}
+.gray {
+     color: #8f908a;
+}
+
+.darkgray {
+     color: #262728;
+}
+
+ .logviewerpanel .cursor:before {
+     opacity: 0;
+     content: "|";
+     color: #f1f1f1;
+     -webkit-animation: blink 0.8s infinite;
+     animation: blink 0.8s infinite;
+}
+ @-webkit-keyframes blink {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+ @keyframes blink {
+     0% {
+         opacity: 0;
+    }
+     50% {
+         opacity: 1;
+    }
+     100% {
+         opacity: 0;
+    }
+}
+/* Demo */
+ .demo {
+     font-size: 1.2em;
+     text-align: center;
+     font-family: 'Old Standard TT', serif;
+}
+ a {
+     color: inherit;
+}

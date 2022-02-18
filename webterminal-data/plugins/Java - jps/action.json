@@ -1,0 +1,5 @@
+{
+  "command": "jps -m",
+  "workspace": "",
+  "showconfirmation": "false"
+}

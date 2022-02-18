@@ -1,0 +1,28 @@
+*.project
+*.class
+*.classpath
+*.prefs
+*.jsdtscope
+target/
+*.settings
+.DS_Store
+*.log
+*.lck
+/target/
+# Directories #
+build/
+bin/
+target/
+tmp/
+test-output/
+log/
+
+# Compiled Files #
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.db
+*.log*

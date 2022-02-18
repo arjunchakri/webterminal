@@ -1,0 +1,5 @@
+{
+  "command": "tail -f $(FILEPATH) ",
+  "workspace": "",
+  "compatibility": "linux"
+}

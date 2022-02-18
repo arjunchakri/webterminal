@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Log Viewer</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css'>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+    
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <!-- moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+	<script	src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
+	
+	</head>
+
+<body>
+    <input type="hidden" th:value="${readerKey}" id="readerKey" />
+    <input type="hidden" th:value="${name}" id="name" />
+    
+    <input type="hidden" id="logfile" />
+    <input type="hidden" id="logdirectory" />
+
+	<div class="Terminal__body " style="background: unset; height: 100%;" id="Terminal__body" >
+	
+	</div>
+           
+    <script>
+        console.log($("#readerKey").val())
+
+        //moment().format('MMMM Do YYYY, h:mm:ss a');
+
+        var socketProtocol = "wss";
+        if (!location.protocol.startsWith("https")) {
+            socketProtocol = "ws";
+        }
+                
+        $(document).ready(function() {
+        });
+        init();
+        var formulaeCached = {}
+
+        function init() {
+
+        	var socket_url = socketProtocol + '://' + window.location.host + '/formula_listener_socket';
+
+        	var socket = new WebSocket(socket_url);
+     		
+     		 $("#Terminal__body").empty();
+            
+            
+            socket.onopen = function() {
+                //socket.send(payload_data_stringified);
+             };
+             socket.onmessage = function(message) {
+                 console.log('Message received from server: ' + message.data);
+                 
+                 updateFormula(message.data)
+                 
+                 //$("#Terminal__body").append("<div class=Terminal__Prompt> <span class=lightbluecustom> " + message.data + " </span> </div>");
+
+             };
+        	
+
+        }
+        
+        function updateFormula(formulaOutput) {
+        	var formulaOutputJson = JSON.parse(formulaOutput);
+        	
+        	var formulaName = formulaOutputJson["name"]
+        	var formulaOutput = formulaOutputJson["output"]
+        	var formulalastmodified = formulaOutputJson["lastmodified"]
+        	
+        	
+        	formulaeCached[formulaName] = formulaOutputJson
+        	
+        	var orderedCache = {};
+        	Object.keys(formulaeCached).sort().forEach(function(key) {
+        		orderedCache[key] = formulaeCached[key];
+        	});
+        	
+        	$("#Terminal__body").empty();
+        	
+            $("#Terminal__body").append("<table id=formulaetable class=\"ui selectable compact celled inverted  table\"> <thead> <tr> <th>Formula </th><th>Value</th><th>LastGenerated</th> </tr> </thead> <tbody> </tbody></table>");
+            
+        	for (var key in orderedCache){
+        		var formulae = orderedCache[key]
+                $("#formulaetable").append("<tr> " +
+                        "<td data-label=\"Formula\">" + formulae["name"] + " </td> " +
+                        "<td data-label=\"Value\"> " + formulae["output"] + " </td> " +
+                        "<td data-label=\"LastGenerated\"> " + formulae["lastmodified"] + " </td> " +
+                        " </tr>");
+        	}
+            
+        	//var cachedFormulaStr = JSON.stringify(orderedCache, undefined, 4); 
+        	//$("#Terminal__body").append("<div class=Terminal__Prompt> Dev console -> <br> <pre> " + cachedFormulaStr + " </pre> </div>");
+
+        }
+        
+
+        function unEntity(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        
+        function selectText(containerid) {
+            if (document.selection) { // IE
+                var range = document.body.createTextRange();
+                range.moveToElementText(document.getElementById(containerid));
+                range.select();
+            } else if (window.getSelection) {
+                var range = document.createRange();
+                range.selectNode(document.getElementById(containerid));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            }
+        }
+        
+        function toggleFullscreen() {
+            var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+                (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+                (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+                (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+            var docElm = document.documentElement;
+            if (!isInFullScreen) {
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen();
+                } else if (docElm.mozRequestFullScreen) {
+                    docElm.mozRequestFullScreen();
+                } else if (docElm.webkitRequestFullScreen) {
+                    docElm.webkitRequestFullScreen();
+                } else if (docElm.msRequestFullscreen) {
+                    docElm.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>

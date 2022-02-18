@@ -1,0 +1,5 @@
+{
+  "command": "TASKKILL /F /PID $(PROCESSPID)",
+  "workspace": "",
+  "compatibility": "windows"
+}

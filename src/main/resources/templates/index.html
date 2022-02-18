@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Project everything</title>
+
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css'>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+
+<link rel="stylesheet" href="./style.css" />
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- moment.js -->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
+</head>
+
+<body>
+	<input type="hidden" th:value="${readerKey}" id="readerKey" />
+	<input type="hidden" id="logfile" />
+	<input type="hidden" id="logdirectory" />
+	<ul class="menuicongroup" id="menuicongroup">
+      <a href="#" onclick="init()" class="menuitem" data-tooltip="Apps view" data-position="right center"  ><li class="menuicon fa fa-terminal" ></li></a>
+      <a href="#" onclick="init_logaccess()" class="menuitem" data-tooltip="Files view" data-position="right center" ><li class="menuicon fa fa-folder-open" ></li></a>
+      <a id="formulaespopup" href="formula" target="_blank" class="menuitem" ><li class="menuicon fa fa-desktop" ></li></a>
+      <!--  a href="#"><li class="menuicon fa fa-rocket" ></li></a>
+      <a href="#"><li class="menuicon fa fa-dribbble" ></li></a-->
+    </ul>
+    
+	<div class="container">
+		<div class="Terminal Terminal_left">
+			<div class="Terminal__Toolbar">
+				<div class="Toolbar__buttons">
+					<button onClick="window.location.reload();" data-tooltip="Refresh" data-position="bottom left" 
+						class="Toolbar__button Toolbar__button--exit">&#10005;</button>
+					<button onClick="window.open(window.location.href, '_blank');" data-tooltip="Duplicate tab" data-position="bottom left"
+						class="Toolbar__button">&#9472;</button>
+					<button onClick="toggleFullscreen();" data-position="bottom left" data-tooltip="Full screen" 
+						class="Toolbar__button">&#9723;</button>
+					
+				</div>
+				<p class="Toolbar__user">
+					Project <span class=green>Everything</span> :~ 
+					<span id="terminal_header_option"></span>
+				</p>
+			</div>
+			<div class="Terminal__body" id="Terminal__body" >
+				<div class="Terminal__text">
+					Initializing terminal...<span class=Prompt__cursor></span>
+				</div>
+			</div>
+			
+		</div>
+		
+		
+		
+	</div>
+
+	
+
+	
+	<div class="ui modal" id="inputModal">
+	  <i class="close icon"></i>
+	  <div class="header" id="inputModalHeader">
+	    Modal header test
+	  </div>
+	  
+	  <div class="scrolling content">
+	    <div class="description" id="inputModalContent">
+	    
+	    	<div class="ui labeled fluid input">
+			  <div class="ui label">
+			    Val 1
+			  </div>
+			  <input type="text" placeholder="mysite.com">
+			</div> <br>
+
+	      <div class="ui header">Test header</div>
+	      <p>test11</p>
+	    </div>
+	  </div>
+	  
+	  <div class="actions" id="inputModalFooter">
+	    <div class="ui black deny button">
+	      Cancel
+	    </div>
+	    <div class="ui positive right labeled icon button">
+	      Run
+	      <i class="right chevron icon"></i>
+	    </div>
+	  </div>
+	</div>
+		
+		
+
+	<script>
+        console.log($("#readerKey").val())
+        
+
+        //moment().format('MMMM Do YYYY, h:mm:ss a');
+
+        var socketProtocol = "wss";
+        if (!location.protocol.startsWith("https")) {
+            socketProtocol = "ws";
+        }
+        
+        var dir_switch = ""
+        var contextPath = "";
+        var url_string = window.location.href;
+        var url = new URL(url_string);
+        var parameters = url.searchParams;
+        if (parameters.toString() != "") {
+        	if(parameters.has("context")){
+        		contextPath = parameters.get('context');
+        	}
+        	if(parameters.has("dir")){
+                dir_switch = parameters.get('dir');
+        		init_logaccess()
+        		switchDir(dir_switch)
+        	}
+        	
+        }
+        var global_id = 1;
+
+
+        $(document).ready(function() {
+        });
+        
+        if(dir_switch == "") {
+        	
+        	//INITIALIZE APP
+            init();
+
+        }
+        
+        $("#formulaespopup").popup({
+        	html: "<iframe src=\"formula\" style=\"width:800px; height:500px\" ></iframe>",
+        	hoverable: true,
+        })
+		
+                
+        function invokeActionVoice(actionId) {
+        	performAction(actionId, readParamFromAction(actionId, "command"), readParamFromAction(actionId, "workspace"))
+        }
+        
+        function hideBody() {
+        	//$("#Terminal__body").hide();
+        	
+      	   	//const fade = { opacity: 0, transition: 'opacity 0.5s' };
+
+       		//$('#Terminal__body').css(fade).delay(100).slideUp(1000, function() {
+       			//nextmethod()
+       		//});
+       	
+        	
+        }
+ 
+
+        function showBody() {
+     	   //const unfade = { opacity: 1, transition: 'opacity 0.5s' };
+
+        	//$('#Terminal__body').css(unfade).delay(100).slideDown(1000);
+        	
+            //$("#Terminal__body").fadeIn(200);
+        }
+        
+        //GLOBAL VAR
+        var actions_list_cache = 1;
+
+        function readParamFromAction(actionIdTarget, fieldname) {
+            for (var i = 0; i < actions_list_cache.length; i++) {
+                var eachElement = actions_list_cache[i];
+
+                var actionId = eachElement.actionId
+                
+                if(actionIdTarget == actionId) {
+                	var fieldValue = eachElement[fieldname]
+                	if(fieldValue) {
+                		return fieldValue
+                	} else {
+                		return ""
+                	}
+                }
+            }
+    		return ""
+        }
+        
+        function init() {
+        	hideBody()
+
+            $.get(contextPath + "/getAllActions", function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	actions_list_cache = data
+                $("#Terminal__body").empty();
+                $("#Terminal__body").append("<div class=Terminal__Prompt> <span class=lightbluecustom> Actions: </span> </div>");
+                $("#Terminal__body").append("<div class=Terminal__Prompt> <span class=white> > To add/edit an action, <a href=\"#\" class=blue  onClick=\"addAction()\"> click here </a>  </span> </div>");
+                
+                $("#Terminal__body").append("<div class=Terminal__Prompt> <span style=\"color:grey\"> Note: Want to trigger action remotely ? Just hit /executeAction?actionId={ACTIONID}</span> </div>");
+
+                $("#Terminal__body").append("<br>");
+
+                for (var i = 0; i < data.length; i++) {
+                    var eachElement = data[i];
+                    var actionId = eachElement.actionId
+                    var command = eachElement.command
+                    var workspace = eachElement.workspace
+
+                    $("#Terminal__body").append(
+                    		"<div class=logline> ---- <a class=green href=\"#\" onClick=\"performAction('" + actionId + "', '" + command + "', '" + workspace + "') \">Run now </a> " + 
+                    		" -- <span class=orange>" + actionId + "</span> " + 
+                    		" -- <span class=blue>" + command + "</span> " + 
+                    		" -- <span class=white>" + workspace + "</span> </div>"
+                    );
+                }
+                
+                showBody()
+                
+                //LIST RUNNING PROCESSES
+                $.get(contextPath + "/getRunningActions", function(innerresponse) {
+                	
+                	var runningactions;
+                	
+                	if (typeof innerresponse == 'object') {
+                		runningactions = innerresponse
+                	} else {
+                		runningactions = JSON.parse(innerresponse);
+                	}
+                	
+                	if(Object.getOwnPropertyNames(runningactions).length <= 0) {
+                		return;
+                	}
+                    $("#Terminal__body").append("<div class=Terminal__Prompt> <span class=lightbluecustom> Running actions: </span> </div>");
+
+                	
+                	for (var key in runningactions){
+                		var runningname = runningactions[key]
+                        $("#Terminal__body").append(
+                        		"<div class=logline> ---- <a class=green href=\"#\" onClick=\"startListeningAction('" + key + "') \">" + runningname + " </a> -- <a class=red href=\"#\" onClick=\"killAction('" + key + "') \"> kill </a>" 
+                        );
+                	}
+                	
+                	
+                });
+
+
+            });
+        }
+       	
+        function killAction(id) {
+        	//LIST RUNNING PROCESSES
+            $.get(contextPath + "/killAction?id=" + id, function(innerresponse) {
+            	
+            	var data;
+            	
+            	if (typeof innerresponse == 'object') {
+            		data = innerresponse
+            	} else {
+            		data = JSON.parse(innerresponse);
+            	}
+            	
+            	alert("Killed...")
+            	init();
+            });
+        }
+
+        function init_logaccess() {
+        	hideBody()
+
+        	$("#Terminal__body").empty();
+            $("#Terminal__body").append("<div class=Terminal__Prompt> <span class=lightbluecustom> Navigator: </span> </div>");
+
+            $("#Terminal__body").append("<div class=Terminal__Prompt> <span class=white> > Upload a file to server, <input type=file id=uploadfile /> <input type=hidden id=uploadDirectory placeholder='Upload directory'/>  </span> </div>");
+            $("#uploadfile").change(function () {
+            	uploadFileToServer();
+            });
+            
+            $("#Terminal__body").append("<div id='uploadstatuspanel'>  </div>");
+            $("#Terminal__body").append("<div class=Terminal__Prompt id='fileviewerfavourites'>  </div> <div class=logline> </div>");
+            $("#Terminal__body").append("<div class=Terminal__Prompt id='fileviewerheader'>  </div> <div class=logline></div>");
+
+            $("#Terminal__body").append("<div class=Terminal__Prompt id='fileviewerpanel'>  </div>");
+
+            $.get(contextPath + "/getCurrentDirContents", function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	
+            	showDirectory(data)
+            	
+           
+        	});
+            
+
+            
+            
+//$.get(contextPath + "/getDirectoryContents", function(response) {
+//    var data;
+//    
+//    if (typeof response == 'object') {
+//      data = response
+//    } else {
+//      data = JSON.parse(response);
+//    }
+//      
+//      $("#Terminal__body").append("<br> <br>");
+//
+//
+//      for (var i = 0; i < data.length; i++) {
+//          var eachFolder = data[i];
+//          var eachFolderName = eachFolder.displayName
+//          var eachFolderPath = eachFolder.path
+//
+//          var folderHTMLClass = "folderview" + i;
+//          //eachFolder -> displayName, path, files
+//          //files -> name, lastModified, size
+//          $("#Terminal__body").append("<div> -- <a class=orange href=\"#\" onClick=\"showhideFolder('" + folderHTMLClass + "')\">" + eachFolderName + "</a> </div>");
+//          var allFiles = eachFolder.files;
+//
+//          for (var j = 0; j < allFiles.length; j++) {
+//              var eachFile = allFiles[j];
+//
+//              $("#Terminal__body").append("<div class='" + folderHTMLClass + "'> ----  " +
+//                  " " +
+//                  "<a class=blue href=\"#\" onClick=\"startExecution('" + eachFile.name + "', '" + eachFolderPath + "', 'true')\">" + eachFile.name + "</a> -- " +
+//                  "<span class=green>" + moment(eachFile.lastModified).format('MMMM Do YYYY, h:mm:ss a') + "</span>" + "-- " +
+//                  "<span class=red>" + bytesToSize(eachFile.size) + "</span>" +
+//                  " </div>");
+//          }
+//
+//          $("." + folderHTMLClass).hide();
+//         
+//
+//      }
+//      $("#terminal_header_option").empty();
+//      $("#terminal_header_option").append("<a href=\"#\" class=blue  onClick=\"init()\"> Switch to actions view</a> ");
+//
+//
+//  });
+            
+
+        }
+        
+        function switchDir(dirname) {
+        	
+        	$.ajax({
+    			url: contextPath + "/getDirContents?path=" + dirname,
+    			type: 'GET',
+    			success: function(response) {
+    				var data;
+                	
+                	if (typeof response == 'object') {
+                		data = response
+                	} else {
+                		data = JSON.parse(response);
+                	}
+                	
+                	showDirectory(data)
+    			},
+    			error: function(jqXHR, textStatus, errorThrown) {
+    				alert("Cannot load the directory")
+    			}
+    		});
+        	
+        }
+        
+        function switchToPrevDir(currentDir) {
+        	
+            $.get(contextPath + "/getParentDirectoryPath?path=" + currentDir, function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	
+            	switchDir(data)
+           
+        	})
+        	
+        }
+        
+        function showSwitchDirectoryAlert(folderPath) {
+        	
+        	var userinput = prompt("Change directory", folderPath)
+        	if(userinput == null) {
+    			return null;
+    		}
+        	
+        	switchDir(userinput)
+        }
+        
+        function showDirectory(data) {
+        	hideBody()
+        	
+            var folderName = data.displayName
+            var folderPath = data.path
+            
+            $("#uploadDirectory").val(folderPath)
+            $("#fileviewerheader").empty();
+        	var editdirectory_element = "<a class=green data-tooltip=\"Change directory\" href=\"#\" onclick=\"showSwitchDirectoryAlert('" + folderPath + "')\"> <i class=\"edit icon\"> </i> </a>"
+        	
+	       	var dir_url = window.location.origin + '?dir=' + folderPath;
+        	var copydir_element = "<a class=green data-tooltip=\"Copy directory URL: " + dir_url + "\" href=\"#\" onclick=\"textToClipboard('" + dir_url + "')\"> <i class=\"share alternate square icon\"> </i> </a>"
+
+        	$("#fileviewerheader").append(" <a class=green data-tooltip=\"Back\" href=\"#\" onclick=\"switchToPrevDir('" + folderPath + "')\"> <i class=\"backward icon\"> </i> </a> <span id=addtofavbuttonholder> </span> &nbsp; -> &nbsp; <div class=logline id=navigatorheadervalue>" + getDirPieces(folderPath) + " </div> &nbsp; " + editdirectory_element + " &nbsp; " + copydir_element + " <span id=headerfilename class=blue></span> <span class=green id=numberoflines></span> <br>");
+            
+            $("#fileviewerpanel").empty();
+
+            $("#fileviewerpanel").append(" <div id=fileviewerinnerpanel > </div>");
+
+            var allFiles = data.files;
+
+            for (var j = 0; j < allFiles.length; j++) {
+                var eachFile = allFiles[j];
+				
+                if(eachFile.isDir) {
+                	
+                	var thisDirectory = folderPath + "/" + eachFile.name
+                	
+                    $("#fileviewerinnerpanel").append("<div class=logline> ----  " +
+                            "<a class=green data-tooltip=\"zip and download directory\" href=\"#\" onClick=\"downloadFileZipped('" + eachFile.name + "', '" + folderPath + "')\" > <i class=\"download icon\"> </i>  </a> -- " +
+                            " <i class=\"folder open icon\"> </i>" +
+                            "<a class=orange href=\"#\" onClick=\"switchDir('" + thisDirectory + "')\">" + eachFile.name + "</a> -- " +
+                            "<span class=blue>" + moment(eachFile.lastModified).format('MMMM Do YYYY, h:mm:ss a') + "</span>" +
+                            " </div>");
+                    
+                } else {
+                	
+                	var thisFile = folderPath + "/" + eachFile.name
+                	
+                    $("#fileviewerinnerpanel").append("<div class=logline> ----  " +
+                            "<a class=green data-tooltip=\"zip and download file\" href=\"#\" onClick=\"downloadFileZipped('" + eachFile.name + "', '" + folderPath + "')\" > <i class=\"download icon\"> </i>   </a> -- " +
+                            //"<a class=green data-tooltip=\"view file\" href=\"#\" onClick=\"startExecution('" + eachFile.name + "', '" + folderPath + "', 'true')\" >   <i class=\"eye icon\"> </i>   </a> -- " +
+                            "<a class=green data-tooltip=\"Copy path\" href=\"#\" onClick=\"textToClipboard('" + thisFile + "')\" >   <i class=\"copy icon\"> </i>   </a> -- " +
+                            //"<a class=green data-tooltip=\"edit file [EXPERIMENTAL]\" href=\"#\" onClick=\"renderFileEdit('" + eachFile.name + "', '" + folderPath + "')\" >   <i class=\"edit icon\"> </i>   </a> -- " +
+							
+                            " <i class=\"file outline icon\"> </i>" +
+                            "<span class=orange >" + eachFile.name + "</span> -- " +
+                            "<span class=blue>" + moment(eachFile.lastModified).format('MMMM Do YYYY, h:mm:ss a') + "</span>" + "-- " +
+                            "<span class=red>" + bytesToSize(eachFile.size) + "</span>" +
+                            " </div>");
+                }
+            }
+            
+            $("#fileviewerinnerpanel").append("<div class=\"logline fixedtobottom\" ><div class=\"ui mini left icon input\"><input type=text id=direxecinput style=\"width: 300px;\" placeholder=\"Enter command\"><i class=\"terminal icon\"></i></div> </div>");
+            
+            var cachedcmds = getCachedCmds()
+            var keypresstracker = cachedcmds.length
+            var keypresstrackerupper = cachedcmds.length
+
+            $("#direxecinput").keypress(function (e) {
+         	 var key = e.which;
+         	 if(key == 13)  // the enter key code
+         	  {
+         		var command = $("#direxecinput").val()
+         		$("#direxecinput").val("")
+         		if(command == "") {
+         			alert("Enter any command")
+         			return;
+         		}
+         		showExecuteCommand(folderPath, command)
+         		localcacheCommand(command)
+         		cachedcmds = getCachedCmds()
+            	keypresstracker = cachedcmds.length
+            	keypresstrackerupper = cachedcmds.length
+         		
+         	    return false;  
+         	  }
+         	 
+           	});
+            
+            $("#direxecinput").keydown(function (e) {
+            	 var key = e.which;
+             	 if(key == 38) { // up
+             		 if(keypresstracker > 0) {
+                  		keypresstracker = keypresstracker - 1;
+             		 }
+             		 $("#direxecinput").val(cachedcmds[keypresstracker])
+             	  } else if(key == 40) { //down
+              		 if(keypresstracker <= keypresstrackerupper - 1) {
+                    	keypresstracker = keypresstracker + 1;
+              		 }
+             		 $("#direxecinput").val(cachedcmds[keypresstracker])
+             	  }
+             	 
+               	});
+            
+            $.get(contextPath + "/getDirectoryContents", function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	
+				displayFavourites(data, folderPath)
+                
+        	});
+            
+        	showBody()
+
+        }
+        
+        var cache_storagekey = "WEBTERMINAL_COMMANDS_CACHE"
+        function localcacheCommand(command) {
+        	var cacheddata = localStorage.getItem(cache_storagekey);
+        	var commandscache = []
+        	if(!(cacheddata === null)) {
+        		commandscache = JSON.parse(cacheddata)
+        	}
+        	
+        	if(commandscache.length > 100) {
+        		//alert("Clearing command cache...")
+        		commandscache = []
+        	}
+
+        	commandscache.push(command);
+
+        	
+			localStorage.setItem(cache_storagekey, JSON.stringify(commandscache));
+        }
+ 
+        function getCachedCmds() {
+        	var cacheddata = localStorage.getItem(cache_storagekey);
+        	var commandscache = []
+        	if(!(cacheddata === null)) {
+        		commandscache = JSON.parse(cacheddata)
+        	}
+        	
+        	return commandscache
+        }
+        
+        function displayFavourites(data, folderPath) {
+
+           	$("#fileviewerfavourites").empty()
+           	$("#fileviewerfavourites").append("<span class=green id=favouritesheader > Favourites: </span>")
+			   
+			  var alreadyfav = false;
+              for (var i = 0; i < data.length; i++) {
+                  var eachFolder = data[i];
+                  var eachFolderName = eachFolder.displayName
+                  var eachFolderPath = eachFolder.path
+				if(folderPath == eachFolderPath) {
+					//current dir is already fav
+					alreadyfav = true;
+				}
+                $("#fileviewerfavourites").append(" -- <a class=orange href=\"#\" onClick=\"switchDir('" + eachFolderPath + "')\">" + eachFolderName + "</a> ");
+              }
+              $("#fileviewerfavourites").append(" -- <a class=red href=\"#\" onClick=\"clearAllFavs()\"> Clear all </a> ");
+
+              $("#addtofavbuttonholder").empty();
+               if(!alreadyfav) {
+            	$("#addtofavbuttonholder").append(" -- <div class=\"ui heart rating\" id=adddirtofav onClick=\"addToFav('" + folderPath + "')\" data-rating=1 data-max-rating=1></div>");
+                $('#adddirtofav').rating();
+              
+              }
+               
+        }
+        
+        function clearAllFavs() {
+            $.get(contextPath + "/clearFavDirs", function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	
+				displayFavourites(data, "")
+                
+        	});
+        }
+        
+        function addToFav(path) {
+    		var displayName = prompt("Enter a displayname for " + path)
+    		if(displayName == null) {
+    			alert("displayName not provided by user. Not making any changes")
+    			return null;
+    		}
+    		
+        	$.get(contextPath + "/addDir?path=" + path + "&displayName=" + displayName, function(response) {
+            	var data;
+            	
+            	if (typeof response == 'object') {
+            		data = response
+            	} else {
+            		data = JSON.parse(response);
+            	}
+            	
+            	displayFavourites(data, path)
+        	});
+
+        }
+        
+        function renderFileEdit(filename, path) {
+        	
+        	var filePath = path + "/" +  filename;
+        	
+            $("#fileviewerpanel").empty();
+
+            $("#fileviewerpanel").append("<iframe id=editiframe src=\"fileedit?path=" + filePath + "\" width=100% height=100% ></iframe>");
+
+        }
+        
+        function getDirPieces(folderPath) {
+        	if(!endsWith(folderPath, "/")) {
+        		folderPath = folderPath + "/"
+        	}
+        	var folderPieces = folderPath.split("/")
+        	var responsePieces = []
+        	for (var j = 1; j < folderPieces.length; j++) {
+        		var innerpath = folderPieces.slice(0,j).join("/") + "/"
+        		var innername = folderPieces[j-1]
+    		
+        		responsePieces.push("<a class=orange href=\"#\" onClick=\"switchDir('" + innerpath + "')\">" + innername + "</a>")
+        		responsePieces.push("<b>/</b>")
+
+        	}
+        	
+        	return responsePieces.join("")
+        }
+        
+        function endsWith(str, suffix) {
+            return str.indexOf(suffix, str.length - suffix.length) !== -1;
+        }
+		
+        function uploadFileToServer() {
+      	  var documentData = new FormData();
+      	  var uploadDirectory = $("#uploadDirectory").val()
+
+		  var fileObj = $('#uploadfile')[0].files[0];
+    	  documentData.append('file', fileObj);
+    	  
+    	  var session_panel_id = generateRandomString()
+		  $("#uploadstatuspanel").append("<div class=uploadsessionpanel id=\"" + session_panel_id + "\" > </div>");
+		  
+		  $("#" + session_panel_id).append("-- Uploading -> " + fileObj.name);
+		  $("#" + session_panel_id).append("<div class=\"ui indicating progress\" id=\"uploadprogressbar" + session_panel_id + "\"> <div class=bar></div> <div class=label id=\"uploadmessage" + session_panel_id + "\" style=\"color:white\">Starting upload</div> </div>");
+    	  
+    	  $.ajax({
+    	      url: "/uploadfile?directory=" + uploadDirectory,
+    	      type: 'POST',
+    	      data: documentData,
+    	      cache: false,
+    	      contentType: false,
+    	      processData: false,
+    	      success: function (response) {
+    	    	  //alert(response);
+                  $('#uploadmessage' + session_panel_id).empty();
+				  $('#uploadmessage' + session_panel_id).append(response + " 😎");
+
+    	      },
+    	      error: function(jqXHR, textStatus, errorThrown) {
+                  $("#uploadprogressbar" + session_panel_id).addClass("error");
+
+                  $('#uploadmessage' + session_panel_id).empty();
+				  $('#uploadmessage' + session_panel_id).append("Uploaded failed... 😱 " );
+
+    	      },
+    	      xhr: function() {
+    	          var xhr = new window.XMLHttpRequest();
+    	          xhr.upload.addEventListener("progress", function(evt) {
+    	              if (evt.lengthComputable) {
+    	                  var percentComplete = ( evt.loaded / evt.total ) * 100;
+
+                          $('#uploadprogressbar' + session_panel_id).progress({
+                        	  percent: percentComplete
+                        	});
+                          
+                          $('#uploadmessage' + session_panel_id).empty();
+						  $('#uploadmessage' + session_panel_id).append(percentComplete + " % uploaded... 😀");
+
+    	              }
+    	         }, false);
+
+    	         xhr.addEventListener("progress", function(evt) {
+    	             if (evt.lengthComputable) {
+   	                  	var percentComplete = ( evt.loaded / evt.total ) * 100;
+                        $('#uploadprogressbar' + session_panel_id).progress({
+                      	  percent: percentComplete
+                      	});
+
+                        $('#uploadmessage' + session_panel_id).empty();
+						$('#uploadmessage' + session_panel_id).append(percentComplete + " % uploaded... 😀");
+    	             }
+    	         }, false);
+
+    	         return xhr;
+    	      },
+    	  });
+
+        }
+        
+        function resolveVariables(command) {
+        	var option
+        	
+        	var hasVariable = false;
+        	
+        	while(option = command.match(/\$\(([^)]+)\)/)) {
+        		hasVariable = true;
+        		var variable = option[1]
+        		var variableValue = prompt("Please enter value of " + variable)
+        		if(variableValue == null) {
+        			alert("Variable not provided by user. " + variable + ". Cannot proceed with execution.")
+        			return null;
+        		}
+        		var variableLiteral = "$(" + variable + ")"
+        		command = command.replace(variableLiteral, variableValue);
+        		console.log("command=" + command + ", variable=" + variable + ", variableValue=" + variableValue)
+			}
+			if(hasVariable) {
+	        	if(!confirm("Please confirm. About to execute the command : " + command)) {
+	        		return null;
+	        	}
+			}
+        	
+        	return command;
+        } 
+        
+        function resolveScriptVariables(command) {
+        	var option
+        	var properties = {}
+        	
+        	var hasVariable = false;
+        	
+        	while(option = command.match(/\@\(([^)]+)\)/)) {
+        		hasVariable = true;
+        		var variable = option[1]
+        		var variableValue = prompt("Please enter value of " + variable)
+        		if(variableValue == null) {
+        			alert("Variable not provided by user. " + variable + ". Cannot proceed with execution.")
+        			return null;
+        		}
+        		properties[variable] = (variableValue)
+        		var variableLiteral = "@(" + variable + ")"
+        		command = command.replace(variableLiteral, "");
+        		console.log("command=" + command + ", variable=" + variable + ", variableValue=" + variableValue)
+			}
+			if(hasVariable) {
+	        	if(!confirm("Please confirm. About to execute the command : " + command)) {
+	        		return properties;
+	        	}
+			}
+			var returnValues = {
+					properties: properties,
+					command: command
+			}
+        	
+        	return returnValues;
+        }
+        
+        
+        function openModal() {
+        	$('#inputModal').modal('show');
+        }
+        
+        function detectVariables(command) {
+        	//NOTE - command is pass by value, so temporarily modifying it to extract vars
+        	executionvars = []
+        	
+        	while(option = command.match(/\$\(([^)]+)\)/)) {
+        		
+        		var variable = option[1]
+        		executionvars.push(variable)
+        		
+        		var variableLiteral = "$(" + variable + ")"
+        		command = command.replace(variableLiteral, "");
+        		console.log("command=" + command + ", variable=" + variable )
+			}
+        	
+        	while(option = command.match(/\@\(([^)]+)\)/)) {
+        		var variable = option[1]
+        		executionvars.push(variable)
+        		
+        		var variableLiteral = "@(" + variable + ")"
+        		command = command.replace(variableLiteral, "");
+        		console.log("command=" + command + ", variable=" + variable )
+			}
+        	
+        	return executionvars;
+        }
+  
+        function performAction(actionId, command, workspace) {
+        	
+        	var executionvars = detectVariables(command)
+        	
+        	showConfirmation(actionId, command, workspace, executionvars)
+        	
+        }
+        
+        function showExecuteCommand(dirpath, command) {
+        	showConfirmation("any", command, dirpath, [], true)
+        }
+        
+        function showExecuteDiag(dirpath) {
+        	showConfirmation("any", "$(COMMAND)", dirpath, ["COMMAND"])
+        }
+        
+        // GLOBAL VARS COMMANDS
+    	var final_command = ""
+        var final_actionid = ""
+        var final_workspace = ""
+        var execution_var_inputs = {};
+
+        function showConfirmation(actionId, command, workspace, executionvars) {
+        	showConfirmation(actionId, command, workspace, executionvars, false)
+        }
+        
+        function showConfirmation(actionId, command, workspace, executionvars, skipconfirmation) {
+        	
+    		final_actionid = actionId
+    		final_workspace = workspace
+    		final_command = command
+
+    		execution_var_inputs = {};
+    		
+    		if((readParamFromAction(actionId, "showconfirmation") == "false") || skipconfirmation) {
+    	        invokeExecution();
+    	        return;
+    		}
+    		
+    		
+    		//ADDING EMAIL NOTIFICATION KEY
+    		executionvars.push("WEBTERMINAL_EMAIL_NOTIFICATION");
+    		executionvars.push("WEBTERMINAL_TEAMS_NOFICATIONS_WEBHOOK_URL");
+    		
+        	$('#inputModalHeader').empty();
+        	$('#inputModalHeader').append("" + actionId);
+        	
+        	$('#inputModalContent').empty();
+        	$('#inputModalContent').append(readParamFromAction(actionId, "description") + " <br>");
+        	
+        	
+        	for (var i = 0; i < executionvars.length; i++) {
+        		var exec_variable = executionvars[i];
+        		execution_var_inputs[exec_variable] = ""; //DEFAULT VALUE
+            	$('#inputModalContent').append("<div class=\"ui labeled fluid input\"> <div class=\"ui label\">" + exec_variable + "</div> <input type=text id=\"" + exec_variable + "\"placeholder=\"" + exec_variable + "\"></div> ");
+
+        	}
+
+        	$('#inputModalContent').append("<br> <div id=commanddisplay> </div> <br>");
+
+    		var render_return = renderCommand("#commanddisplay", "", "", command, execution_var_inputs, workspace)
+        	final_command = render_return[0]
+    		execution_var_inputs = render_return[1]
+    		
+        	$('#inputModalContent').find(':input').on('input', function(e) {
+        		//alert($(this).attr('id') + " -> " + $(this).val()); 
+        		
+        		var render_return = renderCommand("#commanddisplay", $(this).attr('id'), $(this).val(), command, execution_var_inputs, workspace)
+        		final_command = render_return[0]
+    			execution_var_inputs = render_return[1]
+        		
+        		console.log(final_command)
+            });
+        	
+        	$('#inputModalFooter').empty();
+        	$('#inputModalFooter').append(" <div onclick=\"exportAction('" + actionId + "')\" class=\"ui blue button\" data-tooltip=\"Exported app can be loaded to other servers\">  <i class=\"download icon\"></i> Export app </div>");
+        	$('#inputModalFooter').append(" <div class=\"ui black deny button\"> <i class=\"window close icon\"></i>  Cancel </div>");
+        	$('#inputModalFooter').append("<div class=\"ui positive right labeled icon button\" id=proceedbutton onclick=invokeExecution() >  Run <i class=\"right chevron icon\"></i></div>");
+
+        	$('#inputModal')
+        	.modal({
+        		transition: "fade right",
+        		closable: false
+			  })	
+        	.modal('show');
+
+        }
+        
+        function renderCommand(divid, inputid, inputvalue, command, execution_var_inputs, workspace) {
+        	if(inputid != "") {
+	        	execution_var_inputs[inputid] = inputvalue
+        	}
+	        	
+        	for (var key in execution_var_inputs){
+				 var var_value = execution_var_inputs[key]
+				 //if(var_value != "") {
+					command = command.replace("$(" + key + ")", execution_var_inputs[key]);
+				 //}
+			     command = command.replace("@(" + key + ")", "");
+
+       		}
+
+        	$(divid).empty()
+        	$(divid).append("<div class=\"ui blue labels\"><div class=\"ui large label\" id=cmddisplay > <i class=\"terminal icon\"></i> " + command +" </div> </div>");
+        	if(workspace != "") {
+            	$(divid).append("<div class=\"ui blue labels\"><div class=\"ui large label\" data-tooltip=\"Workspace \"> <i class=\"folder open icon\"></i> " + workspace +" </div> </div>");
+        	}
+        	
+        	return [command, execution_var_inputs]
+        }
+        
+        function exportAction(actionId) {
+        	
+        	var requesturl = "/exportAction?actionId=" + actionId
+        			
+        	window.location.replace(requesturl,"_blank");
+        	
+        	
+        }
+        
+        function startListeningAction (runner_key) {
+	       	var socket_url = socketProtocol + '://' + window.location.host + contextPath + '/action_execution_socket';
+            var socket = new WebSocket(socket_url);
+      	 	var payload_data = {
+      	 		runner_key: runner_key
+          	}
+            
+            var payload_data_stringified = JSON.stringify(payload_data)
+            console.log("payload_data_stringified=" + payload_data_stringified)
+
+            socket.onopen = function() {
+                socket.send(payload_data_stringified);
+            };
+            socket.onmessage = function(message) {
+                console.log('Message received from server: ' + message.data);
+                addSequentialMessage(message.data);
+            };
+        	
+        }
+        	
+        function invokeExecution() {
+        	var actionId = final_actionid
+        	var command = final_command
+        	var workspace = final_workspace
+        	var script_inputs = execution_var_inputs
+        	
+        	//alert(command)
+        	
+        	var socket_url = socketProtocol + '://' + window.location.host + contextPath + '/action_execution_socket';
+        	
+        	var script_inputs_stringified = JSON.stringify(script_inputs)
+        	
+            var socket = new WebSocket(socket_url);
+        	 var payload_data = {
+             		actionId: actionId,
+             		command: command,
+             		workspace: workspace,
+             		script_inputs: script_inputs_stringified
+             }
+
+             var payload_data_stringified = JSON.stringify(payload_data)
+             console.log("payload_data_stringified=" + payload_data_stringified)
+
+             socket.onopen = function() {
+        		 global_id = global_id + 1;
+        		 
+                 $("#Terminal__body").append("<div class=\"Terminal__Prompt terminal" + global_id + "\"> <a href=\"#\" class=red onClick=\"$('div.terminal" + global_id + "').remove()\" > [X] Clear </a> <span style=\"color:white\">----------------------------------------------------------------------------------</span> </div>");
+				
+                 addSequentialMessage("<br> <span class=red> ---- Requesting server command :</span> >> <span class=blue> " + command + " </span> ");
+
+                 socket.send(payload_data_stringified);
+             };
+             socket.onmessage = function(message) {
+                 console.log('Message received from server: ' + message.data);
+                 addSequentialMessage(message.data);
+             };
+        	
+        }
+        
+        function configureDirectories() {
+        	var directories = prompt("Please provide the directories list as comma separated (Format: (displayname1), (path1), (displayname1), (path1) || make sure / is used in dir-paths)", "");
+        	if (directories == null || directories == "") {
+        		alert("cannot proceed as directories is not provided");
+        		return;
+        	}
+        	
+            $.get(contextPath + "/setDirs?dirs=" + directories, function(response) {
+            	alert(response);
+            	init_logaccess();
+            });
+
+        }
+        
+        function addAction() {
+        	var actionId = prompt("Please enter a name for action", "");
+        	if (actionId == null) {
+        		alert("cannot proceed as actionId is not given");
+        		return;
+        	}
+        	
+        	var command = prompt("Enter the command for the action. If there are variables in the command, enter as $(VAR_NAME) in its place. eg: \"TASKKILL /F /PID $(PROCESSPID)\"", "");
+        	if (command == null) {
+        		alert("cannot proceed as command is not given");
+        		return;
+        	}
+        	
+        	var workspace = prompt("Enter directory to execute the action", "");
+        	if (workspace == null) {
+        		alert("cannot proceed as workspace is not given");
+        		return;
+        	}
+        	
+        	var requestURL = contextPath + "/addAction?actionId=" + actionId + "&command=" + command + "&workspace=" + workspace;
+            $.get(requestURL, function(response) {
+            	alert("Status: " + response);
+                init();
+            });
+            
+        }
+        
+        function bytesToSize(bytes) {
+            var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (bytes == 0) return '0 Byte';
+            var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+
+        function showhideFolder(divClass) {
+            $("." + divClass).slideToggle();
+        }
+
+        
+        function getMoreLines() {
+            var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+            startExecution(logfile, logdirectory, "false")
+        }
+        
+        function downloadFileZipped() {
+        	var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+        	
+            downloadFileZipped(logfile, logdirectory)
+        }
+
+        function downloadFileZipped(logfile, logdirectory) {
+            
+        	if(!confirm("Are you sure you want proceed ? ")) {
+	        	return;
+	        }
+        	
+            var readerKey = $("#readerKey").val()
+            
+            $("#fileviewerinnerpanel").empty();
+        	
+        	var targethost = window.location.host
+        	if(contextPath != "") {
+        		//LOCAL
+        		targethost = contextPath
+        	}
+
+            var socket = new WebSocket(socketProtocol + '://' + targethost + '/remote_log_socket_socket');
+        	socket.binaryType = 'blob';
+        	var payload_data = {
+            		action: "download",
+            		fileName: logfile,
+            		dirPath: logdirectory,
+            		readerKey: readerKey
+            }
+            var payload_data_stringified = JSON.stringify(payload_data)
+            console.log("payload_data_stringified=" + payload_data_stringified)
+
+            socket.onopen = function() {
+                socket.send(payload_data_stringified);
+            };
+            socket.onmessage = function(message) {
+                console.log('Message received from server: ' + message.data);
+                incomingmessage = JSON.parse(message.data);
+                
+                var action = incomingmessage["action"]
+                var data = incomingmessage["data"]
+                
+                if(action == "click") {
+                	var downloadUrl = window.location.protocol + "//" + window.location.host + contextPath + "/" + data
+                	window.location.replace(downloadUrl,"_blank");
+                	addAppendMessage("Download started...")
+                } if(action == "display") {
+                	addAppendMessage(data);
+                } 
+                
+            };
+            
+        }
+        
+
+        function downloadFileZippedFromContext() {
+        	var logfile = $("#logfile").val()
+            var logdirectory = $("#logdirectory").val()
+            var readerKey = $("#readerKey").val()
+            
+            $("#fileviewerinnerpanel").empty();
+            $("#fileviewerinnerpanel").append("<div class=logline> Downloading the file: " + logfile + ". Please wait <span class=Prompt__cursor></span></div>");
+
+            var requesturl = contextPath + "/downloadLog?fileName=" + logfile + "&dirPath="+ logdirectory + "&readerKey=" + readerKey
+            console.log("requesturl=" + requesturl)
+
+            $.get(requesturl, function(response) {
+            	
+				var responseJson;
+            	
+            	if (typeof response == 'object') {
+            		responseJson = response
+            	} else {
+            		responseJson = JSON.parse(response);
+            	}
+            					
+                for (var i = 0; i < responseJson.length; i++) {
+                	var inputStringBean = responseJson[i]
+                	var transportBean = JSON.parse(inputStringBean);
+                	
+                    var action = transportBean["action"]
+                    var data = transportBean["data"]
+                    
+                    if(action == "click") {
+                    	var downloadUrl = contextPath + "/" + data
+                    	window.location.replace(downloadUrl,"_blank");
+                    	addAppendMessage("Download started...")
+                    } if(action == "display") {
+                    	addAppendMessage(data);
+                    }
+                }
+            });
+            
+        }
+
+        //GLOBAL_VAR
+        var count_of_lines = 0;
+        
+        function startExecution(fileName, dirPath, erasePanel) {
+            $("#logfile").val(fileName)
+            $("#logdirectory").val(dirPath)
+			var targethost = window.location.host
+        	if(contextPath != "") {
+        		//LOCAL
+        		targethost = contextPath.replace(/^https?:\/\//,'');
+        	}
+            var socket = new WebSocket(socketProtocol + '://' + targethost + '/log_socket');
+            var payload_data = {
+            		action: "streamlog",
+            		fileName: fileName,
+            		dirPath: dirPath,
+            		readerKey: $("#readerKey").val()
+            }
+            var payload_data_stringified = JSON.stringify(payload_data)
+            console.log("payload_data_stringified=" + payload_data_stringified)
+            
+            socket.onopen = function() {
+                socket.send(payload_data_stringified);
+            };
+            if (erasePanel != "false") {
+                $("#fileviewerinnerpanel").empty();
+                count_of_lines = 0;
+            }
+            socket.onmessage = function(message) {
+                console.log('Message received from server: ' + message.data);
+                
+                count_of_lines ++;
+                addMessage(message.data);
+                
+            };
+            
+            $("#headerfilename").html(fileName);
+        }
+
+        function addSequentialMessage(message) {
+            //message = unEntity(message);
+
+            $("#Terminal__body").append("<div class=\"logline terminal" + global_id + " \"> " + message + " </div>");
+            //$('#Terminal__body').scrollTop($('#Terminal__body')[0].scrollHeight);
+
+            $('#Terminal__body').stop().animate({
+		      scrollTop: $('#Terminal__body')[0].scrollHeight
+		   	}, 800)
+            
+        }
+
+        
+      
+        function addAppendMessage(message) {
+            message = unEntity(message);
+
+            $("#fileviewerinnerpanel").append("<div class=logline> " + message + " </div>");
+            
+
+        }
+        
+        function addMessage(message) {
+            message = unEntity(message);
+
+            $("#fileviewerinnerpanel").prepend("<div class=logline> " + message + " </div>");
+            
+            $("#numberoflines").html(" - Showing last " + count_of_lines + " lines - <a class=orange href=\"#\" onClick=\"onclick=getMoreLines()\" >Pull more lines</a>");
+            $('#fileviewerinnerpanel').stop().animate({
+  		      scrollTop: $('#fileviewerinnerpanel')[0].scrollHeight
+  		   	}, 800)
+
+        }
+
+        function unEntity(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        
+        function generateRandomString() {
+            return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+       }
+        
+        function selectText(containerid) {
+            if (document.selection) { // IE
+                var range = document.body.createTextRange();
+                range.moveToElementText(document.getElementById(containerid));
+                range.select();
+            } else if (window.getSelection) {
+                var range = document.createRange();
+                range.selectNode(document.getElementById(containerid));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            }
+            
+            document.execCommand("copy");
+        }
+        
+        function textToClipboard(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
+        
+        function toggleFullscreen() {
+            var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null) ||
+                (document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+                (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+                (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+            var docElm = document.documentElement;
+            if (!isInFullScreen) {
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen();
+                } else if (docElm.mozRequestFullScreen) {
+                    docElm.mozRequestFullScreen();
+                } else if (docElm.webkitRequestFullScreen) {
+                    docElm.webkitRequestFullScreen();
+                } else if (docElm.msRequestFullscreen) {
+                    docElm.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>

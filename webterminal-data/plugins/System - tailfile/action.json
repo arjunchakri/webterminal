@@ -1,0 +1,5 @@
+{
+  "command": "powershell -nop -c Get-Content $(FILEPATH) -Wait -Tail 30 ",
+  "workspace": "",
+  "compatibility": "windows"
+}

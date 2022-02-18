@@ -1,0 +1,5 @@
+id,repo,branch,type
+1, pw-test-core-modules-corepatches-63-test, 64, TYPE_COREPATCH
+2, pw-test-core-modules-corepatches-63-test, 65, TYPE_COREPATCH
+3, pw-test-core-modules-corepatches-63-test, 66, TYPE_COREPATCH
+4, pw-test-core-modules-corepatches-63-test, 70, TYPE_COREPAYLOAD

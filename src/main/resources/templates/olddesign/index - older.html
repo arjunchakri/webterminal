@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Log Viewer</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Old+Standard+TT'>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500'>
+    <link rel="stylesheet" href="./style - older.css">
+    
+    <!-- moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    
+    <!-- mark.js https://markjs.io/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js"></script>
+
+</head>
+
+<body >
+        <input type="hidden" th:value="${readerKey}" id="readerKey" />
+        <input type="hidden" id="logfile" />
+        <input type="hidden" id="logdirectory" />
+        
+
+        <div class="headerpanel" >
+			<div class="right-panel" style="float:left; display: inline; margin-left: 10px; margin-top: 4px; height:100%">
+				
+				<span class="red"><b>[ICON]</b></span>
+				<span class="darkgray"><b>filename goes here</b></span>
+				<a href="#" onclick="getDelta()">Get More logs</a>
+			</div>
+			
+			<div class="left-panel" style="float:right; display: inline; margin-right: 10px; margin-top: 4px; height:100%">
+				
+			</div>
+		</div>
+	
+    <div class="logviewerpanel" id="logviewerpanel">
+    	
+    	
+        <div><span class="orange">Loading.. </span></div>
+        
+                
+    </div>
+	  
+            <script>
+        	console.log($("#readerKey").val())
+
+	            var socketProtocol = "wss";
+	            if (!location.protocol.startsWith("https")) {
+	                socketProtocol = "ws";
+	            }
+	            //moment().format('MMMM Do YYYY, h:mm:ss a');
+	            
+	           $(document).ready(function() {
+                    init();
+                });
+
+                function init() {
+                    $.get("/getDirectoryContents", function(response) {
+                        var data = JSON.parse(response);
+                        
+                   		$("#logviewerpanel").empty();
+
+                        $("#logviewerpanel").append("<div> <span class=gray>/* Please select a file to view */ </span> </div>");
+
+                        for(var i = 0; i < data.length; i++ ){
+                        	var eachFolder = data[i];
+                        	var eachFolderName = eachFolder.displayName
+                        	var folderHTMLClass = "folderview" + i;
+                        	//eachFolder -> displayName, path, files
+                        	//files -> name, lastModified, size
+							$("#logviewerpanel").append("<div> -- <span class=orange><a href=\"#\" onClick=\"showhideFolder('" + folderHTMLClass + "')\">" + eachFolderName + "</a> </span> </div>");
+							var allFiles = eachFolder.files;
+							
+							for(var j = 0; j < allFiles.length; j++ ){
+								var eachFile = allFiles[j];
+								
+	                       		$("#logviewerpanel").append("<div class='" + folderHTMLClass + "'> ----  "+ 
+	                       				"<span class=blue> " + 
+	                       				"<a href=\"#\" onClick=\"startExecution('" + eachFile.name + "', '" + eachFolderName + "', 'true')\">" 
+	                       				+ eachFile.name + "</a> </span> -- " + 
+	                       				"<span class=green>" + moment(eachFile.lastModified).format('MMMM Do YYYY, h:mm:ss a') + "</span>" + "-- " +  
+	                       				"<span class=red>" + bytesToSize(eachFile.size) + "</span>" + 
+	                       				" </div>");
+							}
+							
+                       		$("." + folderHTMLClass).hide();
+            			}
+                        
+                        
+                    });
+                    
+                }
+                
+                function bytesToSize(bytes) {
+               	   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+               	   if (bytes == 0) return '0 Byte';
+               	   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+               	   return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+               	}
+	            function showhideFolder(divClass) {
+	            	$("." + divClass).slideToggle();
+	            }
+
+            	function getDelta() {
+            		var logfile = $("#logfile").val()
+            		var logdirectory = $("#logdirectory").val()
+            		alert(logdirectory)
+            		startExecution(logfile,logdirectory, "false")
+            	}
+            	function startExecution(fileName, dirPath, erasePanel) {
+            		$("#logfile").val(fileName)
+            		$("#logdirectory").val(dirPath)
+            		
+                    var socket = new WebSocket(socketProtocol + '://' + window.location.host + '/log_socket');
+					
+                    socket.onopen = function() {
+                        socket.send(fileName + "," + dirPath+ "," + $("#readerKey").val());
+                    };
+                    if(erasePanel != "false") {
+                    	$("#logviewerpanel").empty();
+                    }
+                    socket.onmessage = function(message) {
+                        console.log('Message received from server: ' + message.data);
+                        addMessage(message.data);
+                    };
+                }
+
+                function addMessage(message) {
+                	message = unEntity(message);
+
+                    $("#logviewerpanel").prepend("<div class=logline> " + message + " </div>");
+                    
+                    $('#logviewerpanel').scrollTop($('#logviewerpanel')[0].scrollHeight);
+                    
+                }
+                
+                function unEntity(str){
+                	   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                }
+            	
+            </script>
+</body>
+
+</html>

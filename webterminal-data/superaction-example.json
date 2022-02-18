@@ -1,0 +1,17 @@
+[
+	{
+		"actionId":"Installer - Bundle installation",
+		"commandVars":"",
+		"contextVars":"PACKAGE=HB6.8.0.0,TEAMS_WEBHOOK_URL="
+	},
+	{
+		"actionId":"System - Ping",
+		"commandVars":"TARGETHOST=localhost",
+		"contextVars":""
+	},
+	{
+		"actionId":"System - systeminfo",
+		"commandVars":"",
+		"contextVars":""
+	}
+]

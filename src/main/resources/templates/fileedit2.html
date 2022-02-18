@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Remote Execution</title>
+    <link rel="stylesheet" href="./style.css" />
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- moment.js -->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"></script>
+
+
+</head>
+
+<body>
+	<input type="hidden" th:value="${readerKey}" id="readerKey" />
+	<input type="hidden" th:value="${folderpath}" id="folderpath" />
+	
+	<div class="container">
+		<div class="Terminal">
+			<div class="Terminal__Toolbar">
+				<div class="Toolbar__buttons">
+					<button onClick="window.location.reload();" title="Close session"
+						class="Toolbar__button Toolbar__button--exit">&#10005;</button>
+					<button onClick="selectText('Terminal__body')"
+						title="Select console text" class="Toolbar__button">&#9472;</button>
+					<button onClick="toggleFullscreen();" title="Full screen"
+						class="Toolbar__button">&#9723;</button>
+					<button onClick="getMoreLines();" title="Get more logs"
+						class="Toolbar__button">&#8635;</button>
+					<button onClick="downloadFileZipped();" title="Download file"
+						class="Toolbar__button">&#8615;</button>
+
+				</div>
+				<p class="Toolbar__user">
+					<span class=green>Connected</span> to server:~ <span
+						id="headerfilename" class="blue"></span> <span class=green
+						id="numberoflines"></span> <span id="terminal_header_option"></span>
+				</p>
+			</div>
+
+			<div class="Terminal__body" id="Terminal__body">
+				<div class="Terminal__text">
+					<div id="aceeditor">function foo(items) {
+					    var x = "All this is syntax highlighted";
+					    return x;
+					}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		console.log($("#readerKey").val())
+		console.log($("#folderpath").val())
+		//moment().format('MMMM Do YYYY, h:mm:ss a');
+
+		var socketProtocol = "wss";
+		if (!location.protocol.startsWith("https")) {
+			socketProtocol = "ws";
+		}
+
+		init();
+
+		function init() {
+			var folderpath = $("#folderpath").val();
+
+
+		    var editor = ace.edit("aceeditor");
+		    editor.setTheme("ace/theme/monokai");
+		    editor.session.setMode("ace/mode/javascript");
+			
+			
+
+		}
+
+
+		function toggleFullscreen() {
+			var isInFullScreen = (document.fullscreenElement && document.fullscreenElement !== null)
+					|| (document.webkitFullscreenElement && document.webkitFullscreenElement !== null)
+					|| (document.mozFullScreenElement && document.mozFullScreenElement !== null)
+					|| (document.msFullscreenElement && document.msFullscreenElement !== null);
+
+			var docElm = document.documentElement;
+			if (!isInFullScreen) {
+				if (docElm.requestFullscreen) {
+					docElm.requestFullscreen();
+				} else if (docElm.mozRequestFullScreen) {
+					docElm.mozRequestFullScreen();
+				} else if (docElm.webkitRequestFullScreen) {
+					docElm.webkitRequestFullScreen();
+				} else if (docElm.msRequestFullscreen) {
+					docElm.msRequestFullscreen();
+				}
+			} else {
+				if (document.exitFullscreen) {
+					document.exitFullscreen();
+				} else if (document.webkitExitFullscreen) {
+					document.webkitExitFullscreen();
+				} else if (document.mozCancelFullScreen) {
+					document.mozCancelFullScreen();
+				} else if (document.msExitFullscreen) {
+					document.msExitFullscreen();
+				}
+			}
+		}
+	</script>
+
+</body>
+
+</html>

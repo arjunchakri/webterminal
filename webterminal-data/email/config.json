@@ -1,0 +1,7 @@
+{
+  "smtp_host": "<SMTP_HOST_SERVER_HERE>",
+  "smtp_port": "25",
+  "smtp_username": "",
+  "smtp_password": "",
+  "from_address": "something@sendermail.com"
+}

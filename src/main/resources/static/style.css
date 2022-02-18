@@ -1,0 +1,252 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+body {
+  background: linear-gradient(45deg, #57003f 0%,#f57453 100%);
+  font-family: 'Ubuntu';
+}
+
+
+.menuicon {
+  color: #fff;
+  font-size: 32px;
+  display: block;
+}
+
+.menuicongroup .menuicon:hover {
+  opacity: 0.5;
+}
+
+.menuitem {
+	display: block;
+}
+
+.menuicongroup {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  height: 280px;
+  width: 5%;
+  padding: 0;
+  text-align: center;
+ }
+
+.menuicongroup .menuicon {
+  margin: 30px 0;
+  transition: all .5s ease-out !important;
+  -webkit-transition: all .5s ease-out;
+  -moz-transition: all .5s ease-out;
+  -o-transition: all .5s ease-out;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+     top: 20px;
+     right: 20px;
+     bottom: 20px;
+     left: 20px;
+
+}
+
+.bgcolor {
+	background: black !important;
+		color: white !important;
+
+}
+
+.overridecolor {
+		color: white !important;
+
+}
+
+.uploadsessionpanel {
+	margin: 5px;
+	width: 70%;
+	
+}
+
+.Terminal {
+     position: absolute;
+     top: 20px;
+     right: 20px;
+     bottom: 20px;
+     left: 20px;
+	 color: white;
+	box-shadow: 0px 0px 10px rgba(0,0,0,.5);
+}
+
+.Terminal_left {
+     left: 5%;
+}
+
+.Terminal__Toolbar {
+  background: linear-gradient(#504b45 0%,#3c3b37 100%);
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.Toolbar__buttons {
+  display: flex;
+  align-items: center;
+}
+
+.Toolbar__button {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  padding: 0;
+  font-size: 7px;
+  background: linear-gradient(#7d7871 0%, #595953 100%);
+  text-shadow: 0px 1px 0px rgba(255,255,255,0.2);
+  box-shadow: 0px 0px 1px 0px #41403A,0px 1px 1px 0px #474642;
+  border: none;
+  margin-right: 4px;
+
+}
+.Toolbar__button:hover {
+  cursor: pointer;
+}
+.Toolbar__button--exit {
+  background: #f25d2b;
+  background: linear-gradient(#f37458 0%, #de4c12 100%);
+  background-clip: padding-box;
+}
+.Toolbar__button:focus {
+  outline: none;
+}
+
+.Toolbar__user {
+  color: #d5d0ce;
+  margin-left: 4px;
+  font-size: 12px;
+  line-height: 14px;
+  margin-bottom: 10px;
+  -webkit-app-region: drag;
+  
+}
+.Terminal__body {
+  background: rgb(70 12 44);
+  padding: 5px;
+  overflow-y: scroll;
+  height: calc(100% - 25px);
+  font-family: 'Ubuntu mono';
+}
+
+
+ .Terminal__body::-webkit-scrollbar-track {
+     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+     border-radius: 10px;
+     background-color: #272121;
+}
+ .Terminal__body::-webkit-scrollbar {
+     width: 12px;
+     background-color: #272121;
+}
+ .Terminal__body::-webkit-scrollbar-thumb {
+     border-radius: 10px;
+     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+     background-color: #555;
+}
+.Terminal__text {
+  color: #ddd;
+}
+
+.Terminal__Prompt {
+  margin-top: 10px;
+  display: flex;
+}
+
+.Prompt__user {
+  color: #87d441;
+}
+.Prompt__location {
+  color: #6d85a9;
+}
+.Prompt__dollar {
+  color: #ddd;
+}
+.Prompt__cursor {
+  height: 17px;
+  width: 8px;
+  background: white;
+  display: block;
+  margin-left: 8px;
+  animation: 2000ms ease infinite alternate blink;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .Terminal {
+    max-height: 90%;
+    width: 95%;
+  }
+}
+
+.logline {
+	width: max-content;
+}
+
+.fixedtobottom {
+	position: fixed;
+    bottom: 25px;
+    left: 50%;
+}
+
+
+.blue {
+     color: #66d9ef;
+}
+.purple {
+     color: #8a7bff;
+}
+.red {
+     color: #e92772;
+}
+.green {
+     color: #a6e22d;
+}
+.orange {
+     color: #fd9720;
+}
+.yellow {
+     color: #e6db74;
+}
+.gray {
+     color: #8f908a;
+}
+
+.darkgray {
+     color: #262728;
+}
+
+.lightbluecustom {
+	color: #2fc4b2;
+}
+

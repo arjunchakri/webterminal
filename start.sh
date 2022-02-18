@@ -1,0 +1,1 @@
+java -jar -Dserver.port=9000 app/webterminal.jar
