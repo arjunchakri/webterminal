@@ -1,5 +1,10 @@
+webterminal-temp/
+webterminal-user/
+
+.idea/
 *.project
 *.class
+*.iml
 *.classpath
 *.prefs
 *.jsdtscope

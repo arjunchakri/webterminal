@@ -282,8 +282,9 @@ public class FormulaManager {
 			else {
 				classpath = classpath + classpathSeparator + ".";
 			}
-
-			String compileCommand = "javac " + classpath + " " + javaSourceFile.getName();
+			// TODO Refactor custom java path - Point 2
+			String configuredJavaHome = ActionsManager.getConfiguredJavaHome();
+			String compileCommand = configuredJavaHome + "javac " + classpath + " " + javaSourceFile.getName();
 			System.out.println(" >> " + compileCommand);
 			logs = execute(compileCommand, workspace, null);
 

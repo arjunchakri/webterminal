@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sherlock.webterminal.core.workspace.ActionsManager;
 import org.apache.commons.io.FilenameUtils;
 
 import com.sherlock.webterminal.commandexec.executor.WebListenersHandler;
@@ -62,11 +63,15 @@ public class CustomExecutionManager {
         classpath = classpath + classpathSeparator + ".";
       }
 
-      String compileCommand = "javac " + classpath + " " + javaSourceFile.getName();
+      // TODO Refactor custom java path - Point 1
+      String configuredJavaHome = ActionsManager.getConfiguredJavaHome();
+
+      String compileCommand = configuredJavaHome + "javac " + classpath + " " + javaSourceFile.getName();
+
       System.out.println(" >> " + compileCommand);
       execute(compileCommand, workspace, runnerKey);
 
-      String runCommand = "java " + classpath + " " + FilenameUtils.removeExtension(javaSourceFile.getName());
+      String runCommand = configuredJavaHome + "java " + classpath + " " + FilenameUtils.removeExtension(javaSourceFile.getName());
       System.out.println(" >> " + runCommand);
 
       logs = execute(runCommand, workspace, runnerKey);

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,10 +20,14 @@ import com.sherlock.webterminal.commandexec.data.CommandOS;
 import com.sherlock.webterminal.commandexec.data.TerminalConstants;
 import com.sherlock.webterminal.commandexec.superaction.data.SuperActionPackage;
 import com.sherlock.webterminal.logdownload.processor.ZipFileService;
+import org.springframework.util.StringUtils;
 
 public class ActionsManager {
 
   public final static String PLUGIN_WORKSPACE = WorkspaceConstants.APP_WORKSPACE + "plugins/";
+  public final static String CONFIG_WORKSPACE = WorkspaceConstants.APP_WORKSPACE + "config/";
+
+  public final static String CONFIG_JAVAHOME_JSON = CONFIG_WORKSPACE + "javahome.json/";
 
   public final static String DIR_CONFIGURATION_JSON =
       WorkspaceConstants.APP_USER_WORKSPACE + "/fileviewer/configured_dirs.json";
@@ -35,7 +40,8 @@ public class ActionsManager {
   public final static String PLUGIN_SUPER_ACTION_JSON = PLUGIN_ACTION_WS + "superaction.json";
 
   public static void main(String[] args) throws Exception {
-    System.out.println(getAllActions());
+//    System.out.println(getAllActions());
+    System.out.println("getConfiguredJavaHome -> " + getConfiguredJavaHome());
   }
 
   public static List<Action> getAllActions() throws Exception {
@@ -155,6 +161,26 @@ public class ActionsManager {
     }.getType();
 
     return gson.fromJson(actionContent, type);
+  }
+
+  public static String getConfiguredJavaHome() throws Exception {
+    File targetFile = new File(CONFIG_JAVAHOME_JSON);
+
+    if (!targetFile.exists()) {
+      return "";
+    }
+
+    String fileContent = FileUtils.readFileToString(targetFile, Charset.defaultCharset());
+    if(StringUtils.isEmpty(fileContent)) {
+      return "";
+    }
+
+    File javaHomeConfigured = new File(fileContent, "bin");
+    if(javaHomeConfigured.exists()) {
+      return javaHomeConfigured.getAbsolutePath() + "/";
+    }
+
+    return "";
   }
 
   public static String addAction(String actionId, String command, String workspace) throws Exception {
