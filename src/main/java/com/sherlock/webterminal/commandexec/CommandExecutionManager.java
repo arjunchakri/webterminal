@@ -378,7 +378,10 @@ public class CommandExecutionManager implements Runnable {
             .sendMessage("<span style='color:grey'>[ Loading properties to file " + inputMap + " ]</span>", runnerKey);
 
         Properties pluginProperties = new Properties();
-        inputMap.forEach((key, value) -> pluginProperties.put(key, value));
+//        inputMap.forEach((key, value) -> pluginProperties.put(key, value));
+        for (Map.Entry<String,String> entry : inputMap.entrySet()) {
+          pluginProperties.put(entry.getKey(), entry.getValue());
+        }
         File pluginPropertiesFile = new File(parentFile, "webterminalplugin.properties");
         pluginPropertiesFile.createNewFile();
         FileOutputStream installerPropertiesStream = new FileOutputStream(pluginPropertiesFile);

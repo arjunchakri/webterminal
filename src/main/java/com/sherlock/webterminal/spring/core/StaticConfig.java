@@ -21,19 +21,19 @@ public class StaticConfig  implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     WebMvcConfigurer.super.addInterceptors(registry);
-    
+
     registry.addInterceptor(new HandlerInterceptor() {
-      
+
       @Override
       public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
           throws Exception {
-        
+
         String contextPath = request.getContextPath();
         System.out.println("IM preHandle for " + contextPath);
-        
+
         return HandlerInterceptor.super.preHandle(request, response, handler);
       }
-      
+
     }).addPathPatterns("/static/**");
   }
   

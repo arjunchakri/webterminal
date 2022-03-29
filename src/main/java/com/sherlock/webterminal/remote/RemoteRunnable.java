@@ -22,9 +22,9 @@ public class RemoteRunnable implements Runnable {
   public void run() {
     try {
 
-      String host = remoteHost.getHost();
-      String trimmedHost = remoteHost.getTrimmedHost();
-      Map<String, FormulaWebInput> cachedResults = remoteHost.getCachedResults();
+      final String host = remoteHost.getHost();
+      final String trimmedHost = remoteHost.getTrimmedHost();
+      final Map<String, FormulaWebInput> cachedResults = remoteHost.getCachedResults();
 
       clientEndpoint = SocketConnectionEstablish.connect(trimmedHost, "formula_listener_socket", null,
           new WebsocketClientEndpoint.MessageHandler() {

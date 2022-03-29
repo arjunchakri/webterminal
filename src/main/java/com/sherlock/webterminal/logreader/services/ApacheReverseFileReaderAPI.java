@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sherlock.webterminal.logreader.services.directory.data.DirectoryInputBean;
 import com.sherlock.webterminal.spring.core.socket.LogSocketMessenger;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.springframework.web.socket.WebSocketSession;
@@ -26,7 +27,7 @@ public class ApacheReverseFileReaderAPI {
   }
 
   public List<String> readLastLines(int lastNumberOfLines, WebSocketSession session) throws Exception {
-    List<String> linesCollection = new ArrayList<>();
+    List<String> linesCollection = new ArrayList<String>();
     int counter = 0;
 
     while (counter < lastNumberOfLines) {
@@ -49,7 +50,7 @@ public class ApacheReverseFileReaderAPI {
   }
 
   public List<String> readLastLines(int lastNumberOfLines) throws Exception {
-    List<String> linesCollection = new ArrayList<>();
+    List<String> linesCollection = new ArrayList<String>();
     int counter = 0;
 
     while (counter < lastNumberOfLines) {

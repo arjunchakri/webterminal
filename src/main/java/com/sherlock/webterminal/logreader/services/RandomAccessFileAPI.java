@@ -1,5 +1,7 @@
 package com.sherlock.webterminal.logreader.services;
 
+import com.sherlock.webterminal.logreader.services.directory.data.DirectoryInputBean;
+
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +13,7 @@ public class RandomAccessFileAPI {
   }
 
   public static List<String> readLastLines(String fileName) throws Exception {
-    List<String> linesCollection = new ArrayList<>();
+    List<String> linesCollection = new ArrayList<String>();
 
     RandomAccessFile raf = new RandomAccessFile(fileName, "r");
     ArrayList<Long> arrayList = new ArrayList<Long>();

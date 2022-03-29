@@ -223,10 +223,15 @@ public class ActionsManager {
     File targetFile = new File(filename);
     targetFile.getParentFile().mkdirs();
     targetFile.createNewFile();
-
-    try (Writer writer = new FileWriter(targetFile)) {
+    Writer writer = null;
+    try {
+      writer = new FileWriter(targetFile);
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       gson.toJson(data, writer);
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      writer.close();
     }
   }
 

@@ -76,18 +76,22 @@ public class FileManager {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-
-    try (PrintWriter out = new PrintWriter(new FileOutputStream(targetFile, true))) {
+    PrintWriter out = null;
+    try {
+      out = new PrintWriter(new FileOutputStream(targetFile, true));
       out.println(saveContents);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
+    } finally {
+      out.close();
     }
   }
 
   private static void readFileToEditor(File folderPath, WebSocketSession session) {
     // TODO Change entire API
-
-    try (BufferedReader br = new BufferedReader(new FileReader(folderPath))) {
+    BufferedReader br = null;
+    try {
+      br = new BufferedReader(new FileReader(folderPath));
       String line;
       while ((line = br.readLine()) != null) {
         LogSocketMessenger.sendMessage(line, session);
@@ -95,6 +99,12 @@ public class FileManager {
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
+    } finally {
+      try {
+        br.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
     LogSocketMessenger.sendMessage("ENDOFFILEWEBTERMINAL", session);
 

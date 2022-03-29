@@ -135,7 +135,7 @@ public class CustomFormulaExecutor {
 
   }
 
-  private static void invokeFormulaAsync(CustomFormula customFormula) {
+  private static void invokeFormulaAsync(final CustomFormula customFormula) {
     new Thread(new Runnable() {
 
       @Override

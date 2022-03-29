@@ -72,7 +72,7 @@ public class FileNamesProvider {
 
     String configurationFilePath = ActionsManager.DIR_CONFIGURATION_JSON;
     File configurationFile = new File(configurationFilePath);
-    List<DirectoryInputBean> dirInputs = new ArrayList<>();
+    List<DirectoryInputBean> dirInputs = new ArrayList<DirectoryInputBean>();
     Gson gson = new Gson();
 
     if (configurationFile.exists()) {
