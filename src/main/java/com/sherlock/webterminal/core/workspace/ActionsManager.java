@@ -1,14 +1,12 @@
 package com.sherlock.webterminal.core.workspace;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 
@@ -27,7 +25,9 @@ public class ActionsManager {
   public final static String PLUGIN_WORKSPACE = WorkspaceConstants.APP_WORKSPACE + "plugins/";
   public final static String CONFIG_WORKSPACE = WorkspaceConstants.APP_WORKSPACE + "config/";
 
-  public final static String CONFIG_JAVAHOME_JSON = CONFIG_WORKSPACE + "javahome.json/";
+  public final static String CONFIG_JAVAHOME_JSON = CONFIG_WORKSPACE + "javahome.json";
+  public final static String CONFIG_TRANSLATION_PROP = CONFIG_WORKSPACE + "commands-translator.properties";
+  public final static String CONFIG_TRANSLATION_PROP_CLASSPATH = "javaconfig/commands-translator.properties";
 
   public final static String DIR_CONFIGURATION_JSON =
       WorkspaceConstants.APP_USER_WORKSPACE + "/fileviewer/configured_dirs.json";
@@ -161,6 +161,29 @@ public class ActionsManager {
     }.getType();
 
     return gson.fromJson(actionContent, type);
+  }
+
+  public static Map<String, String> getConfiguredTranslationMappings() throws Exception {
+    try {
+      Properties myProps = new Properties();
+
+      myProps.load(ActionsManager.class.getClassLoader().getResourceAsStream(CONFIG_TRANSLATION_PROP_CLASSPATH));
+
+      File targetFile = new File(CONFIG_TRANSLATION_PROP);
+
+      if (!targetFile.exists()) {
+        return (Map) myProps;
+      }
+
+      FileInputStream in = new FileInputStream(targetFile);
+
+      myProps.load(in);
+
+      return (Map) myProps;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new HashMap<>();
+    }
   }
 
   public static String getConfiguredJavaHome() throws Exception {

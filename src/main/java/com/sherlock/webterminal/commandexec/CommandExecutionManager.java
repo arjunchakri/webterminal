@@ -71,8 +71,11 @@ public class CommandExecutionManager implements Runnable {
   }
 
   public static void main(String[] args) throws Exception {
-    executeCommand("jps");
+//    executeCommand("jps");
+
   }
+
+
 
   public static String executeCommand(String actionId) throws Exception {
     try {
@@ -101,12 +104,24 @@ public class CommandExecutionManager implements Runnable {
 
   }
 
+
   public static ExecutionResponse executeAction(String actionId, String command, String workspace, String script_inputs,
       String runnerKey) throws WebListenterException {
     ExecutionResponse executionResponse = null;
     WebListenersHandler
         .sendMessage("<span style='color:grey'>[ Attempting to execute action: " + actionId + " ]</span>", runnerKey);
     try {
+
+      try {
+        Map<String, String> configuredTranslationMappings = ActionsManager.getConfiguredTranslationMappings();
+        for (Map.Entry<String, String> entry : configuredTranslationMappings.entrySet()) {
+          command = command.replaceAll(entry.getKey(), entry.getValue());
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+
       List<SuperActionPackage> superAction = ActionsManager.getSuperAction(actionId);
       int execResponse = 0;
       long execInit = System.currentTimeMillis();
