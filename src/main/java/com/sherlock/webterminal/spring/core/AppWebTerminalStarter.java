@@ -11,7 +11,7 @@ import com.sherlock.webterminal.formulas.CustomFormulaExecutor;
 
 @SpringBootApplication
 //@EnableAutoConfiguration
-@ComponentScan(basePackages = {"com.sherlock.webterminal"})
+@ComponentScan(basePackages = {"com.sherlock.webterminal", "com.logviewer.springboot"})
 public class AppWebTerminalStarter extends SpringBootServletInitializer {
 
 //  @Bean
