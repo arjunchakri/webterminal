@@ -449,14 +449,24 @@
                 } else {
                 	
                 	var thisFile = folderPath + "/" + eachFile.name
+
+					var viewLog = ""
+					try {
+						if(eachFile.name.toLowerCase().includes("log")) {
+							viewLog += "<a class=green data-tooltip=\"View log\" href=\"#\" onClick=\"openLogViewer('" + eachFile.name + "', '" + folderPath + "')\" >   <i class=\"eye icon\"> </i>   </a> -- ";
+						}
+					}
+					catch (exception_var) {
+					}
                 	
                     $("#fileviewerinnerpanel").append("<div class=logline> ----  " +
                             "<a class=green data-tooltip=\"zip and download file\" href=\"#\" onClick=\"downloadFileZipped('" + eachFile.name + "', '" + folderPath + "')\" > <i class=\"download icon\"> </i>   </a> -- " +
-                            //"<a class=green data-tooltip=\"view file\" href=\"#\" onClick=\"startExecution('" + eachFile.name + "', '" + folderPath + "', 'true')\" >   <i class=\"eye icon\"> </i>   </a> -- " +
+							viewLog +
+							// "<a class=green data-tooltip=\"view file\" href=\"#\" onClick=\"startExecution('" + eachFile.name + "', '" + folderPath + "', 'true')\" >   <i class=\"eye icon\"> </i>   </a> -- " +
                             "<a class=green data-tooltip=\"Copy path\" href=\"#\" onClick=\"textToClipboard('" + thisFile + "')\" >   <i class=\"copy icon\"> </i>   </a> -- " +
-                            //"<a class=green data-tooltip=\"edit file [EXPERIMENTAL]\" href=\"#\" onClick=\"renderFileEdit('" + eachFile.name + "', '" + folderPath + "')\" >   <i class=\"edit icon\"> </i>   </a> -- " +
-							
-                            " <i class=\"file outline icon\"> </i>" +
+                            // "<a class=green data-tooltip=\"edit file [EXPERIMENTAL]\" href=\"#\" onClick=\"renderFileEdit('" + eachFile.name + "', '" + folderPath + "')\" >   <i class=\"edit icon\"> </i>   </a> -- " +
+
+							" <i class=\"file outline icon\"> </i>" +
                             "<span class=orange >" + eachFile.name + "</span> -- " +
                             "<span class=blue>" + moment(eachFile.lastModified).format('MMMM Do YYYY, h:mm:ss a') + "</span>" + "-- " +
                             "<span class=red>" + bytesToSize(eachFile.size) + "</span>" +
@@ -615,7 +625,15 @@
         	});
 
         }
-        
+
+		function openLogViewer(filename, path) {
+
+			var filePath = path + "/" +  filename;
+
+			window.open("logs/log?path=" + filePath, '_blank').focus();
+
+		}
+
         function renderFileEdit(filename, path) {
         	
         	var filePath = path + "/" +  filename;
